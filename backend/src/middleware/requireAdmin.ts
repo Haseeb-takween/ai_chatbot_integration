@@ -8,7 +8,9 @@ export const ADMIN_SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Separate Vercel projects are always cross-site in production and need
 // SameSite=None + Secure. Localhost dev must stay Lax without Secure.
-const isProduction = env.NODE_ENV === "production";
+// NODE_ENV alone isn't reliable on Vercel's serverless runtime, so also
+// treat any Vercel deployment (VERCEL=1) as production.
+const isProduction = env.NODE_ENV === "production" || env.IS_VERCEL;
 
 export const adminSessionCookieOptions = {
   httpOnly: true,
