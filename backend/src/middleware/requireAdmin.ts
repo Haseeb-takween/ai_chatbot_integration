@@ -4,7 +4,7 @@ import { env } from "../config/env";
 import { AppError } from "./errorHandler";
 
 export const ADMIN_SESSION_COOKIE = "admin_session";
-export const ADMIN_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export const ADMIN_SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function requireAdmin(req: Request, _res: Response, next: NextFunction): void {
   const token = req.cookies?.[ADMIN_SESSION_COOKIE];
