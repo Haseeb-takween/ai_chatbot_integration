@@ -1,6 +1,7 @@
 import type { ChatRole } from "./chat";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/api";
+const TOKEN_KEY = "admin_token";
 
 export interface AdminConversationSummary {
   id: string;
@@ -40,6 +41,19 @@ export class AdminRequestError extends Error {
   }
 }
 
+export function getAdminToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setAdminToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearAdminToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
 async function parseError(response: Response): Promise<string> {
   const message = await response
     .json()
@@ -50,13 +64,17 @@ async function parseError(response: Response): Promise<string> {
 }
 
 async function adminFetch(path: string, init?: RequestInit): Promise<Response> {
+  const token = getAdminToken();
   let response: Response;
 
   try {
     response = await fetch(`${API_URL}/admin${path}`, {
       ...init,
-      credentials: "include",
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...init?.headers,
+      },
     });
   } catch {
     throw new AdminRequestError(
@@ -72,19 +90,17 @@ async function adminFetch(path: string, init?: RequestInit): Promise<Response> {
   return response;
 }
 
-export async function adminLogin(password: string): Promise<void> {
-  await adminFetch("/login", {
+export async function adminLogin(email: string, password: string): Promise<void> {
+  const response = await adminFetch("/login", {
     method: "POST",
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ email, password }),
   });
+  const { token } = (await response.json()) as { token: string };
+  setAdminToken(token);
 }
 
-export async function adminLogout(): Promise<void> {
-  await adminFetch("/logout", { method: "POST" });
-}
-
-export async function checkAdminSession(): Promise<void> {
-  await adminFetch("/session");
+export function adminLogout(): void {
+  clearAdminToken();
 }
 
 export async function fetchAdminStats(): Promise<AdminStats> {

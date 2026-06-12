@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AdminRequestError, checkAdminSession, fetchAdminConversation, type AdminConversationDetail } from "@/lib/admin";
+import {
+  AdminRequestError,
+  clearAdminToken,
+  fetchAdminConversation,
+  getAdminToken,
+  type AdminConversationDetail,
+} from "@/lib/admin";
 import { MessageBubble } from "@/components/MessageBubble";
 
 function formatDate(value: string): string {
@@ -18,19 +24,22 @@ export default function AdminConversationPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!getAdminToken()) {
+      router.replace("/admin/login");
+      return;
+    }
+
     let cancelled = false;
 
     void (async () => {
       try {
-        await checkAdminSession();
-        if (cancelled) return;
-
         const data = await fetchAdminConversation(params.id);
         if (cancelled) return;
         setConversation(data);
       } catch (err: unknown) {
         if (cancelled) return;
         if (err instanceof AdminRequestError && err.unauthorized) {
+          clearAdminToken();
           router.replace("/admin/login");
           return;
         }

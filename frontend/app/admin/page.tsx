@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 import {
   AdminRequestError,
   adminLogout,
+  clearAdminToken,
   fetchAdminConversations,
   fetchAdminStats,
+  getAdminToken,
   type AdminConversationSummary,
   type AdminStats,
 } from "@/lib/admin";
@@ -26,6 +28,11 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!getAdminToken()) {
+      router.replace("/admin/login");
+      return;
+    }
+
     let cancelled = false;
 
     void Promise.resolve().then(async () => {
@@ -44,6 +51,7 @@ export default function AdminDashboardPage() {
       } catch (err) {
         if (cancelled) return;
         if (err instanceof AdminRequestError && err.unauthorized) {
+          clearAdminToken();
           router.replace("/admin/login");
           return;
         }
@@ -60,12 +68,9 @@ export default function AdminDashboardPage() {
     };
   }, [page, router]);
 
-  async function handleLogout() {
-    try {
-      await adminLogout();
-    } finally {
-      router.replace("/admin/login");
-    }
+  function handleLogout() {
+    adminLogout();
+    router.replace("/admin/login");
   }
 
   return (

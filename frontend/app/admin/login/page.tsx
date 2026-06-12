@@ -6,6 +6,7 @@ import { AdminRequestError, adminLogin } from "@/lib/admin";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +17,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      await adminLogin(password);
+      await adminLogin(email, password);
       router.replace("/admin");
     } catch (err) {
       const message =
@@ -37,8 +38,19 @@ export default function AdminLoginPage() {
           admin<span className="text-accent">.login</span>
         </h1>
         <p className="mb-6 font-mono text-xs text-muted">
-          Enter the admin password to continue.
+          Enter your admin credentials to continue.
         </p>
+
+        <label className="mb-2 block font-mono text-xs uppercase tracking-widest text-muted">
+          Email
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          autoFocus
+          className="mb-4 w-full border border-border bg-background px-3 py-2 font-mono text-sm text-foreground focus:border-accent-dim focus:outline-none"
+        />
 
         <label className="mb-2 block font-mono text-xs uppercase tracking-widest text-muted">
           Password
@@ -47,7 +59,6 @@ export default function AdminLoginPage() {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          autoFocus
           className="mb-4 w-full border border-border bg-background px-3 py-2 font-mono text-sm text-foreground focus:border-accent-dim focus:outline-none"
         />
 
@@ -59,7 +70,7 @@ export default function AdminLoginPage() {
 
         <button
           type="submit"
-          disabled={isLoading || !password}
+          disabled={isLoading || !email || !password}
           className="w-full border border-accent-dim px-3 py-2 font-mono text-xs uppercase tracking-widest text-accent transition-colors hover:bg-accent/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isLoading ? "checking..." : "log in"}

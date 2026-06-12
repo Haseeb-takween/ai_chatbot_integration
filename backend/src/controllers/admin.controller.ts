@@ -4,47 +4,33 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { env } from "../config/env";
 import { AppError } from "../middleware/errorHandler";
-import {
-  ADMIN_SESSION_COOKIE,
-  adminSessionCookieOptions,
-} from "../middleware/requireAdmin";
 import { ConversationModel } from "../models/conversation.model";
 
 const loginSchema = z.object({
+  email: z.string().email(),
   password: z.string().min(1),
 });
 
 export function adminLogin(req: Request, res: Response, next: NextFunction): void {
   try {
-    const { password } = loginSchema.parse(req.body);
+    const { email, password } = loginSchema.parse(req.body);
 
-    if (password !== env.ADMIN_PASSWORD) {
+    if (email !== env.ADMIN_EMAIL || password !== env.ADMIN_PASSWORD) {
       throw new AppError(401, "Invalid credentials");
     }
 
     const token = jwt.sign({ role: "admin" }, env.ADMIN_SESSION_SECRET, {
-      expiresIn: "24h",
+      expiresIn: "7d",
     });
 
-    res.cookie(ADMIN_SESSION_COOKIE, token, adminSessionCookieOptions);
-
-    res.json({ status: "ok" });
+    res.json({ token });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      next(new AppError(400, "Password is required"));
+      next(new AppError(400, "Email and password are required"));
       return;
     }
     next(err);
   }
-}
-
-export function adminLogout(_req: Request, res: Response): void {
-  res.clearCookie(ADMIN_SESSION_COOKIE, adminSessionCookieOptions);
-  res.json({ status: "ok" });
-}
-
-export function adminSession(_req: Request, res: Response): void {
-  res.json({ authenticated: true });
 }
 
 const listQuerySchema = z.object({

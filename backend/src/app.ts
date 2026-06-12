@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
@@ -18,7 +17,6 @@ app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-app.use(cookieParser());
 
 if (env.NODE_ENV !== "test") {
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
@@ -31,11 +29,9 @@ app.get("/", (_req, res) => {
   });
 });
 
-const ADMIN_AUTH_PATHS = new Set(["/admin/login", "/admin/logout", "/admin/session"]);
-
 if (env.MONGODB_URI) {
   app.use("/api", async (req: Request, _res: Response, next: NextFunction) => {
-    if (ADMIN_AUTH_PATHS.has(req.path)) {
+    if (req.path === "/admin/login") {
       next();
       return;
     }
