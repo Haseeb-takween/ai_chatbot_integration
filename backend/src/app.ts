@@ -1,9 +1,10 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { type Express } from "express";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env";
+import { connectDB } from "./lib/db";
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
 import apiRouter from "./routes";
@@ -23,6 +24,24 @@ app.use(cookieParser());
 
 if (env.NODE_ENV !== "test") {
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
+}
+
+app.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    message: "Hello! Welcome to the Al-Noor Institute chatbot API.",
+  });
+});
+
+if (env.MONGODB_URI) {
+  app.use("/api", async (_req: Request, _res: Response, next: NextFunction) => {
+    try {
+      await connectDB();
+      next();
+    } catch (err) {
+      next(err);
+    }
+  });
 }
 
 app.use("/api", apiRouter);
