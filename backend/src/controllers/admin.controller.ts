@@ -48,6 +48,10 @@ export function adminLogout(_req: Request, res: Response): void {
   res.json({ status: "ok" });
 }
 
+export function adminSession(_req: Request, res: Response): void {
+  res.json({ authenticated: true });
+}
+
 const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

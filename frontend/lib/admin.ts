@@ -83,6 +83,10 @@ export async function adminLogout(): Promise<void> {
   await adminFetch("/logout", { method: "POST" });
 }
 
+export async function checkAdminSession(): Promise<void> {
+  await adminFetch("/session");
+}
+
 export async function fetchAdminStats(): Promise<AdminStats> {
   const response = await adminFetch("/stats");
   return (await response.json()) as AdminStats;

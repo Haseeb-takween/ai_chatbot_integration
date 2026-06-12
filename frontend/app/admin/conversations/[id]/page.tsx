@@ -25,6 +25,7 @@ export default function AdminConversationPage() {
           router.replace("/admin/login");
           return;
         }
+
         const message =
           err instanceof AdminRequestError
             ? err.message

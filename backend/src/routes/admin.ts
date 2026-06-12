@@ -5,6 +5,7 @@ import {
   adminListConversations,
   adminLogin,
   adminLogout,
+  adminSession,
   adminStats,
 } from "../controllers/admin.controller";
 import { requireAdmin } from "../middleware/requireAdmin";
@@ -20,6 +21,7 @@ const loginLimiter = rateLimit({
 
 adminRouter.post("/login", loginLimiter, adminLogin);
 adminRouter.post("/logout", adminLogout);
+adminRouter.get("/session", requireAdmin, adminSession);
 
 adminRouter.use(requireAdmin);
 adminRouter.get("/stats", adminStats);

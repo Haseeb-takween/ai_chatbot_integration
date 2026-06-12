@@ -33,8 +33,15 @@ app.get("/", (_req, res) => {
   });
 });
 
+const ADMIN_AUTH_PATHS = new Set(["/admin/login", "/admin/logout", "/admin/session"]);
+
 if (env.MONGODB_URI) {
-  app.use("/api", async (_req: Request, _res: Response, next: NextFunction) => {
+  app.use("/api", async (req: Request, _res: Response, next: NextFunction) => {
+    if (ADMIN_AUTH_PATHS.has(req.path)) {
+      next();
+      return;
+    }
+
     try {
       await connectDB();
       next();
