@@ -1,11 +1,8 @@
 import "dotenv/config";
-import { z } from "zod";
 
-const envSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
-  PORT: z.coerce.number().int().positive().default(3000),
-});
-
-export const env = envSchema.parse(process.env);
+export const env = {
+  NODE_ENV: process.env.NODE_ENV ?? "development",
+  PORT: Number(process.env.PORT) || 3000,
+  MONGODB_URI: process.env.MONGODB_URI,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "",
+};

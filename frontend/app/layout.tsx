@@ -1,0 +1,35 @@
+import type { Metadata } from "next";
+import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
+import "./globals.css";
+
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+export const metadata: Metadata = {
+  title: "console.chat",
+  description: "A minimal terminal-inspired chat interface.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${plexSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+    >
+      <body className="h-dvh flex flex-col overflow-hidden">{children}</body>
+    </html>
+  );
+}
